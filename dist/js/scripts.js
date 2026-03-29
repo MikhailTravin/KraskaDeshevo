@@ -534,6 +534,7 @@ function tabs() {
       });
     }
     setTabsStatus(tabsBlock);
+    initGallerySliders(tabsBlock);
   }
 
   function setTabsStatus(tabsBlock) {
@@ -563,6 +564,7 @@ function tabs() {
           if (isHash && !tabsContentItem.closest('.popup')) {
             setHash(`tab-${tabsBlockIndex}-${index}`);
           }
+          initGallerySliders(tabsBlock);
         } else {
           if (tabsBlockAnimate) {
             _slideUp(tabsContentItem, tabsBlockAnimate);
@@ -589,6 +591,8 @@ function tabs() {
       e.preventDefault();
     }
   }
+
+  initGallerySliders();
 }
 tabs();
 
@@ -902,68 +906,50 @@ formSubmit();
 
 //========================================================================================================================================================
 
-function initFilters() {
-  const filterContainers = document.querySelectorAll('[data-filters]');
+const filterBlocks = document.querySelectorAll('[data-filters]');
 
-  filterContainers.forEach(container => {
-    const filterTitles = container.querySelectorAll('.filter__title');
-    const filterBodies = container.querySelectorAll('[data-filter]');
+if (filterBlocks) {
+  filterBlocks.forEach(block => {
+    const filterButtons = block.querySelectorAll('.tabs-filter__title');
+    const cardsContainer = block.querySelector('.block-catalog__cards');
 
-    if (!filterTitles.length) return;
+    if (!cardsContainer) return;
 
-    function activateFilter(filterValue) {
-      filterTitles.forEach(title => {
-        if (title.getAttribute('data-filter') === filterValue) {
-          title.classList.add('active');
+    const productCards = cardsContainer.querySelectorAll('.product-card');
+
+    function filterProducts(filterValue) {
+      productCards.forEach(card => {
+        const cardFilter = card.getAttribute('data-filter');
+
+        if (filterValue === 'all' || cardFilter === filterValue) {
+          card.classList.remove('hide');
         } else {
-          title.classList.remove('active');
+          card.classList.add('hide');
         }
       });
-
-      filterBodies.forEach(body => {
-        if (body.getAttribute('data-filter') === filterValue) {
-          body.classList.add('active');
-        } else {
-          body.classList.remove('active');
-        }
-      });
-
-      const event = new CustomEvent('filterChanged', {
-        detail: {
-          container: container,
-          filterValue: filterValue
-        }
-      });
-      document.dispatchEvent(event);
     }
 
-    filterTitles.forEach(title => {
-      title.addEventListener('click', function () {
+    filterButtons.forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+
         const filterValue = this.getAttribute('data-filter');
-        if (filterValue) {
-          activateFilter(filterValue);
-        }
+
+        filterButtons.forEach(btn => {
+          btn.classList.remove('active');
+        });
+
+        this.classList.add('active');
+
+        filterProducts(filterValue);
       });
     });
 
-    const activeFilter = container.querySelector('.filter__title.active');
-    if (activeFilter) {
-      const filterValue = activeFilter.getAttribute('data-filter');
-      if (filterValue) {
-        activateFilter(filterValue);
-      }
-    } else {
-      const firstFilter = filterTitles[0];
-      if (firstFilter) {
-        const filterValue = firstFilter.getAttribute('data-filter');
-        if (filterValue) {
-          activateFilter(filterValue);
-        }
-      }
+    if (productCards.length > 0) {
+      filterProducts('all');
     }
   });
 }
-initFilters();
 
 //========================================================================================================================================================
 
@@ -971,13 +957,32 @@ if (document.querySelector('.images-product')) {
   const thumbsSwiper = new Swiper('.images-product__thumb', {
     observer: true,
     observeParents: true,
-    slidesPerView: 5,
+    slidesPerView: 'auto',
     spaceBetween: 8,
+    direction: "horizontal",
     speed: 400,
-    preloadImages: true,
     navigation: {
       prevEl: '.images-product__arrow-prev',
       nextEl: '.images-product__arrow-next',
+    },
+    breakpoints: {
+      768: {
+        slidesPerView: 'auto',
+        spaceBetween: 8,
+        direction: "vertical",
+      },
+      992: {
+        slidesPerView: 3,
+        spaceBetween: 8,
+      },
+      1100: {
+        slidesPerView: 4,
+        spaceBetween: 8,
+      },
+      1300: {
+        slidesPerView: 5,
+        spaceBetween: 8,
+      },
     },
   });
 
@@ -997,6 +1002,115 @@ if (document.querySelector('.images-product')) {
     },
   });
 }
+
+if (document.querySelector('.block-reviews__slider')) {
+  const swiperReviews = new Swiper('.block-reviews__slider', {
+    observer: true,
+    observeParents: true,
+    slidesPerView: 1,
+    spaceBetween: 16,
+    speed: 400,
+    navigation: {
+      prevEl: '.block-reviews__arrow-prev',
+      nextEl: '.block-reviews__arrow-next',
+    },
+    pagination: {
+      el: ".block-reviews__pagination",
+      clickable: true,
+    },
+    breakpoints: {
+      650: {
+        slidesPerView: 2,
+        spaceBetween: 16,
+      },
+      768: {
+        slidesPerView: 2,
+        spaceBetween: 24,
+      },
+      1100: {
+        slidesPerView: 3,
+        spaceBetween: 24,
+      },
+    },
+  });
+}
+
+function initGallerySliders() {
+  const tabBodies = document.querySelectorAll('[data-tabs-body] .tabs__body');
+
+  tabBodies.forEach((tabBody) => {
+    const sliderElement = tabBody.querySelector('.block-gallery__slider');
+
+    if (sliderElement && !sliderElement.swiper) {
+      const prevEl = tabBody.querySelector('.block-gallery__arrow-prev');
+      const nextEl = tabBody.querySelector('.block-gallery__arrow-next');
+      const paginationEl = tabBody.querySelector('.block-gallery__pagination');
+
+      new Swiper(sliderElement, {
+        observer: true,
+        observeParents: true,
+        slidesPerView: 1,
+        spaceBetween: 16,
+        speed: 400,
+        navigation: {
+          prevEl: prevEl,
+          nextEl: nextEl,
+        },
+        pagination: {
+          el: paginationEl,
+          clickable: true,
+        },
+        breakpoints: {
+          650: {
+            slidesPerView: 2,
+            spaceBetween: 16,
+          },
+          768: {
+            slidesPerView: 2,
+            spaceBetween: 24,
+          },
+          1100: {
+            slidesPerView: 3,
+            spaceBetween: 24,
+          },
+        },
+      });
+    }
+  });
+}
+initGallerySliders();
+window.addEventListener('resize', function () {
+  initGallerySliders();
+});
+
+const slider = document.querySelector('.block-cooperation__slider');
+let swiperCooperation = null;
+const initSwiper = () => {
+  if (window.innerWidth <= 768 && !swiperCooperation) {
+    swiperCooperation = new Swiper('.block-cooperation__slider', {
+      observer: true,
+      observeParents: true,
+      slidesPerView: 1,
+      spaceBetween: 16,
+      speed: 400,
+      pagination: {
+        el: ".block-cooperation__pagination",
+        clickable: true,
+      },
+      breakpoints: {
+        550: {
+          slidesPerView: 2,
+          spaceBetween: 16,
+        },
+      },
+    });
+  } else if (window.innerWidth > 768 && swiperCooperation) {
+    swiperCooperation.destroy(true, true);
+    swiperCooperation = null;
+  }
+};
+initSwiper();
+window.addEventListener('resize', initSwiper);
 
 //========================================================================================================================================================
 
@@ -1223,3 +1337,343 @@ function spollers() {
   }
 }
 spollers();
+
+//========================================================================================================================================================
+
+const upButton = document.querySelector('.footer__up');
+
+if (upButton) {
+  upButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+}
+
+//========================================================================================================================================================
+
+const mapElement = document.querySelector('#map1');
+if (mapElement) {
+  const mapObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        mapObserver.unobserve(mapElement);
+
+        if (typeof ymaps === 'undefined') {
+          const script = document.createElement('script');
+          script.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
+          script.async = true;
+
+          script.onload = () => {
+            if (typeof ymaps !== 'undefined') {
+              ymaps.ready(safeInitMap);
+            }
+          };
+
+          script.onerror = () => {
+            console.error('Yandex Maps failed to load');
+          };
+
+          document.head.appendChild(script);
+        } else {
+          ymaps.ready(safeInitMap);  // ← Запускаем через ymaps.ready
+        }
+      }
+    });
+  }, {
+    rootMargin: '0px 0px 200px 0px'
+  });
+
+  mapObserver.observe(mapElement);
+}
+function safeInitMap() {
+  const mapElement = document.getElementById('map1');
+  if (!mapElement || mapElement.dataset.initialized === 'true') return;
+
+  const myMap = new ymaps.Map('map1', {
+    center: [54.994595, 73.363168],
+    zoom: 17,
+    controls: ['zoomControl']
+  });
+
+  const placemark = new ymaps.Placemark([54.994595, 73.363168], {
+  }, {
+  });
+
+  myMap.geoObjects.add(placemark);
+
+  mapElement.dataset.initialized = 'true';
+}
+
+//========================================================================================================================================================
+
+
+Fancybox.bind("[data-fancybox]", {
+  // опции
+});
+
+//========================================================================================================================================================
+
+const popupProductSelect = document.querySelector('.popup-product-select');
+
+if (popupProductSelect) {
+  const paletteContainer = document.querySelector('.popup-product-button__palette');
+  const colorsContainer = document.querySelector('.popup-product-button__colors');
+  const titleSpan = document.querySelector('.popup-product-button__titles span');
+  const trashBtn = document.querySelector('.popup-product-button__trash');
+  const paletteOptions = document.querySelectorAll('[data-palette] .options2__item');
+  const checkboxesContainer = document.querySelector('[data-checked]');
+  const dropdown = document.querySelector('.popup-product-select__dropdown');
+  const productButton = document.querySelector('.popup-product-button');
+
+  paletteContainer.style.display = 'none';
+  colorsContainer.style.display = 'none';
+  if (trashBtn) {
+    trashBtn.style.display = 'none';
+  }
+
+  let selectedPalette = null;
+  let selectedColors = [];
+  let maxColors = 0;
+  let isActive = false;
+
+  function getMaxColors() {
+    if (checkboxesContainer) {
+      const max = parseInt(checkboxesContainer.getAttribute('data-checked'));
+      return isNaN(max) ? 0 : max;
+    }
+    return 0;
+  }
+
+  maxColors = getMaxColors();
+
+  function updateVisibility() {
+    if (selectedPalette) {
+      paletteContainer.style.display = 'flex';
+    } else {
+      paletteContainer.style.display = 'none';
+    }
+
+    if (selectedColors.length > 0) {
+      colorsContainer.style.display = 'flex';
+    } else {
+      colorsContainer.style.display = 'none';
+    }
+
+    if (trashBtn) {
+      if (selectedPalette || selectedColors.length > 0) {
+        trashBtn.style.display = 'flex';
+      } else {
+        trashBtn.style.display = 'none';
+      }
+    }
+
+    if (selectedPalette || selectedColors.length > 0) {
+      titleSpan.style.display = 'none';
+    } else {
+      titleSpan.style.display = 'inline';
+    }
+  }
+
+  function updateColorsDisplay() {
+    colorsContainer.innerHTML = '';
+
+    selectedColors.forEach((color, index) => {
+      const colorElement = document.createElement('div');
+      colorElement.className = 'popup-product-button__color';
+
+      let displayText = color.text;
+      if (index < selectedColors.length - 1) {
+        displayText = color.text + ',';
+      }
+
+      colorElement.textContent = displayText;
+      colorElement.setAttribute('data-color-index', index);
+      colorsContainer.appendChild(colorElement);
+    });
+
+    updateVisibility();
+  }
+
+  function updatePaletteDisplay() {
+    if (selectedPalette) {
+      paletteContainer.textContent = selectedPalette;
+    }
+    updateVisibility();
+  }
+
+  function togglePopup(show) {
+    if (show === undefined) {
+      isActive = !isActive;
+    } else {
+      isActive = show;
+    }
+
+    if (isActive) {
+      popupProductSelect.classList.add('active');
+    } else {
+      popupProductSelect.classList.remove('active');
+    }
+  }
+
+  function handleClickOutside(event) {
+    if (popupProductSelect && !popupProductSelect.contains(event.target)) {
+      togglePopup(false);
+    }
+  }
+
+  function syncCheckboxes() {
+    checkboxes.forEach(checkbox => {
+      const checkboxValue = checkbox.getAttribute('value');
+      const isSelected = selectedColors.some(color => color.value === checkboxValue);
+      checkbox.checked = isSelected;
+
+      const label = checkbox.closest('.checkbox');
+      if (label) {
+        if (isSelected) {
+          label.classList.add('filled');
+        } else {
+          label.classList.remove('filled');
+        }
+      }
+    });
+  }
+
+  function addColor(colorValue, colorText) {
+    if (selectedColors.some(color => color.value === colorValue)) {
+      return;
+    }
+
+    const newColor = { value: colorValue, text: colorText };
+
+    if (selectedColors.length >= maxColors && maxColors > 0) {
+      selectedColors.shift();
+      selectedColors.push(newColor);
+    } else {
+      selectedColors.push(newColor);
+    }
+
+    syncCheckboxes();
+    updateColorsDisplay();
+  }
+
+  function removeColor(colorValue) {
+    const index = selectedColors.findIndex(color => color.value === colorValue);
+    if (index !== -1) {
+      selectedColors.splice(index, 1);
+      syncCheckboxes();
+      updateColorsDisplay();
+    }
+  }
+
+  const checkboxes = document.querySelectorAll('.checkbox__input');
+
+  checkboxes.forEach(checkbox => {
+    const checkboxValue = checkbox.getAttribute('value');
+    const checkboxItem = checkbox.closest('.checkbox');
+    const textElement = checkboxItem.querySelector('.checkbox__text');
+    const colorText = textElement ? textElement.textContent : '';
+
+    checkbox.addEventListener('change', function () {
+      maxColors = getMaxColors();
+
+      if (this.checked) {
+        addColor(checkboxValue, colorText);
+      } else {
+        removeColor(checkboxValue);
+      }
+    });
+  });
+
+  paletteOptions.forEach(option => {
+    const radioInput = option.querySelector('.options2__input');
+    const textElement = option.querySelector('.options2__text');
+
+    radioInput.addEventListener('change', function () {
+      if (this.checked) {
+        selectedPalette = textElement.textContent;
+        updatePaletteDisplay();
+      }
+    });
+  });
+
+  if (trashBtn) {
+    trashBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+
+      selectedColors = [];
+      selectedPalette = null;
+
+      paletteOptions.forEach(option => {
+        const radioInput = option.querySelector('.options2__input');
+        if (radioInput) {
+          radioInput.checked = false;
+        }
+      });
+
+      syncCheckboxes();
+      paletteContainer.textContent = '';
+
+      updateColorsDisplay();
+      updatePaletteDisplay();
+    });
+  }
+
+  if (productButton) {
+    productButton.addEventListener('click', function (e) {
+      e.stopPropagation();
+
+      if (!e.target.closest('.popup-product-button__trash')) {
+        togglePopup();
+      }
+    });
+  }
+
+  document.addEventListener('click', handleClickOutside);
+
+  if (dropdown) {
+    dropdown.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  function initializeFromExisting() {
+    const checkedPalette = document.querySelector('[data-palette] .options2__input:checked');
+    if (checkedPalette) {
+      const parentOption = checkedPalette.closest('.options2__item');
+      const textElement = parentOption.querySelector('.options2__text');
+      if (textElement) {
+        selectedPalette = textElement.textContent;
+        updatePaletteDisplay();
+      }
+    }
+
+    const checkedCheckboxes = document.querySelectorAll('.checkbox__input:checked');
+    const currentMax = getMaxColors();
+
+    selectedColors = [];
+
+    checkedCheckboxes.forEach((checkbox, index) => {
+      if (selectedColors.length < currentMax) {
+        const checkboxValue = checkbox.getAttribute('value');
+        const checkboxItem = checkbox.closest('.checkbox');
+        const textElement = checkboxItem.querySelector('.checkbox__text');
+        const colorText = textElement ? textElement.textContent : '';
+
+        if (checkboxValue) {
+          selectedColors.push({ value: checkboxValue, text: colorText });
+        }
+      } else {
+        checkbox.checked = false;
+      }
+    });
+
+    syncCheckboxes();
+    updateColorsDisplay();
+    togglePopup(false);
+  }
+
+  initializeFromExisting();
+}
