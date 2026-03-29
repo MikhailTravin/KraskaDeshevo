@@ -114,10 +114,12 @@
     z-index: 1;
     position: absolute;
     right: 0;
-    bottom: 0;
+    bottom: 16px;
     pointer-events: none;
     overflow: hidden;
     background: transparent;
+    border-radius: 20px;
+    background: var(--line);
 }
 
 [data-simplebar].simplebar-dragging .simplebar-content {
@@ -135,8 +137,8 @@
     left: 0;
     right: 0px;
     min-height: 10px;
-    background: #d4a67c;
-    border-radius: 26px;
+    background: linear-gradient(319deg, #67a420 0%, #c5dd23 100%);
+    border-radius: 20px;
 }
 
 .simplebar-scrollbar.simplebar-visible:before {
@@ -147,7 +149,7 @@
 
 .simplebar-track.simplebar-vertical {
     top: 0;
-    width: 5px;
+    width: 4px;
 }
 
 .simplebar-track.simplebar-vertical .simplebar-scrollbar:before {
