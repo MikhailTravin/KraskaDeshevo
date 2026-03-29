@@ -4143,6 +4143,9 @@ a {
 .header__menu ul li a strong {
   font-weight: 700;
 }
+.header__menu ul li a._navigator-active {
+  color: #67a420;
+}
 .header__menu ul li a:hover {
   color: #67a420;
 }
