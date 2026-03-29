@@ -170,6 +170,9 @@
                     strong {
                         font-weight: 700;
                     }
+                    &._navigator-active {
+                        color: #67a420;
+                    }
                     &:hover {
                         color: #67a420;
                     }
